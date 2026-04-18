@@ -18,7 +18,8 @@ import {
 	type PrCacheContext,
 } from "./status-line/git-utils";
 import { getPreset } from "./status-line/presets";
-import { renderSegment, type SegmentContext } from "./status-line/segments";
+import { registerExtensionSegment, renderSegment, type SegmentContext } from "./status-line/segments";
+import type { RegisteredStatusLineSegment } from "../extensibility/extensions/types";
 import { getSeparator } from "./status-line/separators";
 import { calculateTokensPerSecond } from "./status-line/token-rate";
 
@@ -108,6 +109,10 @@ export class StatusLineComponent implements Component {
 		} else {
 			this.#hookStatuses.set(key, text);
 		}
+	}
+
+	registerExtensionSegment(id: string, segment: RegisteredStatusLineSegment): void {
+		registerExtensionSegment(id, segment);
 	}
 
 	watchBranch(onBranchChange: () => void): void {

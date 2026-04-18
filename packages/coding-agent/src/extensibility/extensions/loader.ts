@@ -28,6 +28,7 @@ import type {
 	LoadExtensionsResult,
 	MessageRenderer,
 	RegisteredCommand,
+	RegisteredStatusLineSegment,
 	ToolDefinition,
 } from "./types";
 
@@ -174,6 +175,15 @@ class ConcreteExtensionAPI implements ExtensionAPI, IExtensionRuntime {
 
 	registerMessageRenderer<T>(customType: string, renderer: MessageRenderer<T>): void {
 		this.extension.messageRenderers.set(customType, renderer as MessageRenderer);
+	}
+
+	registerStatusLineSegment(
+		id: string,
+		segment: {
+			render: RegisteredStatusLineSegment["render"];
+		},
+	): void {
+		this.extension.statusLineSegments.set(id, { id, ...segment });
 	}
 
 	getFlag(name: string): boolean | string | undefined {

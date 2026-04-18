@@ -269,6 +269,16 @@ export class ExtensionRunner {
 		this.runtime.flagValues.set(name, value);
 	}
 
+	getRegisteredStatusLineSegments(): RegisteredStatusLineSegment[] {
+		const segments: RegisteredStatusLineSegment[] = [];
+		for (const ext of this.extensions) {
+			for (const segment of ext.statusLineSegments.values()) {
+				segments.push(segment);
+			}
+		}
+		return segments;
+	}
+
 	static readonly #RESERVED_SHORTCUTS = new Set([
 		"ctrl+c",
 		"ctrl+d",

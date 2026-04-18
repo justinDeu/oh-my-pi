@@ -1057,6 +1057,14 @@ export interface ExtensionAPI {
 	/** Register a custom renderer for CustomMessageEntry. */
 	registerMessageRenderer<T = unknown>(customType: string, renderer: MessageRenderer<T>): void;
 
+	/** Register a custom status line segment. */
+	registerStatusLineSegment(
+		id: string,
+		segment: {
+			render: RegisteredStatusLineSegment["render"];
+		},
+	): void;
+
 	// =========================================================================
 	// Actions
 	// =========================================================================
@@ -1329,6 +1337,26 @@ export interface ExtensionCommandContextActions {
 	reload: () => Promise<void>;
 }
 
+
+// ============================================================================
+// Status Line Segments
+// ============================================================================
+
+/** A status line segment registered by an extension. */
+export interface RegisteredStatusLineSegment {
+	id: string;
+	render: (ctx: ExtensionSegmentContext) => { content: string; visible: boolean };
+}
+
+/** Segment context provided to extension-registered status line segments. */
+export interface ExtensionSegmentContext {
+	/** The current agent session. */
+	session: {
+		/** Session entries (includes custom entries written by extensions). */
+		getEntries(): Array<{ type?: string; customType?: string; data?: unknown }>;
+	};
+}
+
 /** Full runtime = state + actions. */
 export interface ExtensionRuntime extends ExtensionRuntimeState, ExtensionActions {}
 
@@ -1343,6 +1371,7 @@ export interface Extension {
 	commands: Map<string, RegisteredCommand>;
 	flags: Map<string, ExtensionFlag>;
 	shortcuts: Map<KeyId, ExtensionShortcut>;
+	statusLineSegments: Map<string, RegisteredStatusLineSegment>;
 }
 
 /** Result of loading extensions. */

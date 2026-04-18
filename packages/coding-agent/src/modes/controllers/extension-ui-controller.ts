@@ -268,6 +268,11 @@ export class ExtensionUiController {
 
 		extensionRunner.initialize(actions, contextActions, commandActions, uiContext);
 
+		// Register extension status line segments
+		for (const segment of extensionRunner.getRegisteredStatusLineSegments()) {
+			this.ctx.statusLine.registerExtensionSegment(segment.id, segment);
+		}
+
 		// Subscribe to extension errors
 		extensionRunner.onError((error: ExtensionError) => {
 			this.showExtensionError(error.extensionPath, error.error);
@@ -646,6 +651,7 @@ export class ExtensionUiController {
 			return;
 		}
 		this.ctx.statusLine.setHookStatus(key, text);
+		this.ctx.updateEditorTopBorder();
 		this.ctx.ui.requestRender();
 	}
 

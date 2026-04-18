@@ -11,6 +11,7 @@ import { getContextUsageLevel, getContextUsageThemeColor } from "./context-thres
 import type { RenderedSegment, SegmentContext, StatusLineSegment, StatusLineSegmentId } from "./types";
 
 export type { SegmentContext } from "./types";
+export type { ExtensionSegmentContext, RegisteredStatusLineSegment } from "../../extensibility/extensions/types";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Helpers
@@ -396,12 +397,27 @@ export const SEGMENTS: Record<StatusLineSegmentId, StatusLineSegment> = {
 	session_name: sessionNameSegment,
 };
 
-export function renderSegment(id: StatusLineSegmentId, ctx: SegmentContext): RenderedSegment {
-	const segment = SEGMENTS[id];
-	if (!segment) {
-		return { content: "", visible: false };
-	}
-	return segment.render(ctx);
+/** Extension-registered segments (populated during initialization). */
+const extensionSegments = new Map<string, { render: (ctx: SegmentContext) => RenderedSegment }>();
+
+/** Register a status line segment from an extension. */
+export function registerExtensionSegment(id: string, segment: { render: (ctx: SegmentContext) => RenderedSegment }): void {
+	extensionSegments.set(id, segment);
 }
 
-export const ALL_SEGMENT_IDS: StatusLineSegmentId[] = Object.keys(SEGMENTS) as StatusLineSegmentId[];
+export function renderSegment(id: string, ctx: SegmentContext): RenderedSegment {
+	const builtIn = SEGMENTS[id as StatusLineSegmentId];
+	if (builtIn) {
+		return builtIn.render(ctx);
+	}
+	const ext = extensionSegments.get(id);
+	if (ext) {
+		return ext.render(ctx);
+	}
+	return { content: "", visible: false };
+}
+
+export const ALL_SEGMENT_IDS: string[] = [
+	...Object.keys(SEGMENTS),
+	...extensionSegments.keys(),
+];
